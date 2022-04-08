@@ -2,12 +2,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { Flex, Box, Text, Button } from "@chakra-ui/react";
 
+import { baseUrl, fetchApi } from "../utils/fetchApi";
+
 const Banner = ({
   purpose,
   title1,
   title2,
-  dest1,
-  dest2,
+  desc1,
+  desc2,
   buttonText,
   linkName,
   imageUrl,
@@ -24,21 +26,22 @@ const Banner = ({
         {title2}
       </Text>
       <Text fontSize="lg" paddingTop="3" paddingBottom="3" color="gray.700">
-        {dest1}
+        {desc1}
         <br />
-        {dest2}
+        {desc2}
       </Text>
-      <Button fontSize="xl" bg="blue.300" color="white">
+      <Button fontSize="xl">
         <Link href={linkName}>{buttonText}</Link>
       </Button>
     </Box>
   </Flex>
 );
 
-const index = () => {
+const Home = ({ propertiesForRent, propertiesForSale }) => {
+  console.log(propertiesForRent, propertiesForSale);
+
   return (
-    <div>
-      <h1>Hello World</h1>
+    <Box>
       <Banner
         purpose="RENT A HOME"
         title1="Rental Homes for"
@@ -49,6 +52,9 @@ const index = () => {
         linkName="/search?purpose=for-rent"
         imageUrl="https://bayut-production.s3.eu-central-1.amazonaws.com/image/145426814/33973352624c48628e41f2ec460faba4"
       />
+      <Flex flexWrap="wrap">
+        {/* Fetch the properties and map over them */}
+      </Flex>
       <Banner
         purpose="Buy A HOME"
         title1="Find, Buy and own Your"
@@ -56,12 +62,28 @@ const index = () => {
         desc1="Explore Apartments, villas, Homes"
         desc2="and more"
         buttonText="Explore Renting"
-        linkName="/search?purpose=for-rent"
-        imageUrl="https://bayut-production.s3.eu-central-1.amazonaws.com/image/145426814/33973352624c48628e41f2ec460faba4"
+        linkName="/search?purpose=for-sale"
+        imageUrl="https://bayut-production.s3.eu-central-1.amazonaws.com/image/110993385/6a070e8e1bae4f7d8c1429bc303d2008"
       />
-      <Banner purpose={"For Rent"} />
-    </div>
+      {/* Fetch the properties and map over them */}
+    </Box>
   );
 };
 
-export default index;
+export async function getStaticProps() {
+  const propertyForSale = await fetchApi(
+    `${baseUrl}/properties/list?locationExternalIDs=5002&purpose=for-sale&hitsPerPage=6`
+  );
+  const propertyForRent = await fetchApi(
+    `${baseUrl}/properties/list?locationExternalIDs=5002&purpose=for-rent&hitsPerPage=6`
+  );
+
+  return {
+    props: {
+      propertiesForSale: propertyForSale?.hits,
+      propertiesForRent: propertyForRent?.hits,
+    },
+  };
+}
+
+export default Home;
